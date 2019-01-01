@@ -6555,7 +6555,7 @@ class ReportTransformations extends Set {
 			await this.stage.load();
 
 			new SnackBar({
-				message: 'Transformation Deleted',
+				message: 'Transformation Added',
 				icon: 'far fa-save',
 			});
 

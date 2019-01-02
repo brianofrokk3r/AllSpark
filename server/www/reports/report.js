@@ -98,6 +98,7 @@ exports.list = class extends API {
 				ot.owner,
 				ot.owner_id,
 				ot.type,
+				ot.order,
 				ot.title,
 				ot.options
 			FROM
@@ -119,6 +120,7 @@ exports.list = class extends API {
 				ot.owner,
 				ot.owner_id,
 				ot.type,
+				ot.order,
 				ot.title,
 				ot.options
 			FROM
@@ -618,7 +620,11 @@ exports.list = class extends API {
 
 				try {
 					visualization_options = JSON.parse(visualization.options);
-					visualization_options.transformations = []
+					visualization_options.transformations = [];
+
+					visualization_transformations.sort( (a, b) => {
+						return a.order - b.order;
+					});
 				}
 				catch(e) {}
 
@@ -629,7 +635,7 @@ exports.list = class extends API {
 						transformation.options = JSON.parse(transformation.options);
 						visualization_options.transformations.push(transformation);
 					}
-					catch(e){}
+					catch(e) {}
 				}
 
 				visualization.options = JSON.stringify(visualization_options);

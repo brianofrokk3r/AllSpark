@@ -6631,11 +6631,11 @@ class ReportTransformation {
 			container.querySelector('form').classList.toggle('hidden');
 		});
 
-		container.querySelector('.actions .move-up').on('click', () => this.moveUp());
+		container.querySelector('.actions .move-up').on('click', e => this.moveUp(e));
 
 		container.querySelector('.update-transformation').on('submit', e => this.update(e));
 
-		container.querySelector('.actions .move-down').on('click', () => this.moveDown());
+		container.querySelector('.actions .move-down').on('click', e => this.moveDown(e));
 
 		container.querySelector('.actions .preview').on('click', () => {
 
@@ -6651,7 +6651,7 @@ class ReportTransformation {
 		return container;
 	}
 
-	async moveUp() {
+	async moveUp(e) {
 
 		const
 			list = Array.from(this.transformations),
@@ -6661,24 +6661,42 @@ class ReportTransformation {
 			return;
 		}
 
-		this.transformations.clear();
-
 		const order = list[position].order;
 
 		list[position].order = list[position - 1].order;
 		list[position - 1].order = order;
 
-		for(const [key, transformation] of list.entries()) {
+		try {
+			await Promise.all([
+				list[position].update(e, true),
+				list[position - 1].update(e, true)
+			]);
 
-			this.transformations.add(transformation);
+			await DataSource.load(true);
 
-			if(key == position || key == position - 1) {
-				await transformation.update();
-			}
+			await this.stage.load();
+
+			this.stage.container.querySelector('.transformations .body').classList.remove('hidden');
+
+			new SnackBar({
+				message: 'Transformation Updated',
+				icon: 'far fa-save',
+			});
+		}
+
+		catch(e) {
+
+			new SnackBar({
+				message: 'Request Failed',
+				subtitle: e.message,
+				type: 'error',
+			});
+
+			throw e;
 		}
 	}
 
-	async moveDown() {
+	async moveDown(e) {
 
 		const
 			list = Array.from(this.transformations),
@@ -6688,24 +6706,43 @@ class ReportTransformation {
 			return;
 		}
 
-		this.transformations.clear();
-
 		const order = list[position].order;
 
 		list[position].order = list[position + 1].order;
 		list[position + 1].order = order;
 
-		for(const [key, transformation] of list.entries()) {
+		try {
 
-			this.transformations.add(transformation);
+			await Promise.all([
+				list[position].update(e, true),
+				list[position + 1].update(e, true),
+			]);
 
-			if(key == position || key == position + 1) {
-				await transformation.update();
-			}
+			await DataSource.load(true);
+
+			await this.stage.load();
+
+			this.stage.container.querySelector('.transformations .body').classList.remove('hidden');
+
+			new SnackBar({
+				message: 'Transformation Updated',
+				icon: 'far fa-save',
+			});
+		}
+
+		catch(e) {
+
+			new SnackBar({
+				message: 'Request Failed',
+				subtitle: e.message,
+				type: 'error',
+			});
+
+			throw e;
 		}
 	}
 
-	async update(e) {
+	async update(e, move) {
 
 		if(e) {
 			e.preventDefault();
@@ -6724,6 +6761,10 @@ class ReportTransformation {
 
 			await API.call('reports/transformations/update', json, option);
 
+			if(move) {
+				return;
+			}
+
 			await DataSource.load(true);
 
 			await this.stage.load();
@@ -6736,6 +6777,10 @@ class ReportTransformation {
 			});
 
 		} catch(e) {
+
+			if(move) {
+				return;
+			}
 
 			new SnackBar({
 				message: 'Request Failed',

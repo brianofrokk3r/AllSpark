@@ -619,6 +619,7 @@ exports.list = class extends API {
 				let visualization_options = {};
 
 				try {
+
 					visualization_options = JSON.parse(visualization.options);
 					visualization_options.transformations = [];
 
@@ -626,7 +627,11 @@ exports.list = class extends API {
 						return a.order - b.order;
 					});
 				}
-				catch(e) {}
+				catch(e) {
+
+					visualization_options = {};
+					visualization_options.transformations = [];
+				}
 
 				for (const transformation of visualization_transformations || []) {
 

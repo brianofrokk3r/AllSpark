@@ -5794,8 +5794,12 @@ ConfigureVisualization.types.set('pie', class PieOptions extends ReportVisualiza
 			</div>
 		`;
 
-		for(const element of this.formContainer.querySelectorAll('select, input'))
+		for(const element of this.formContainer.querySelectorAll('select, input')) {
+
 			element[element.type == 'checkbox' ? 'checked' : 'value'] = this.visualization.options && this.visualization.options[element.name];
+		}
+
+		container.querySelector('select[name=labelPosition]').value = this.visualization.options.labelPosition || 'inside';
 
 		return container;
 	}

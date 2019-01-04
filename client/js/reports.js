@@ -10169,6 +10169,8 @@ Visualization.list.set('pie', class Pie extends Visualization {
 
 		await this.source.fetch(options);
 
+		this.source.originalColumns = new Map(this.source.columns);
+
 		this.process();
 
 		await this.render(options);
@@ -10186,13 +10188,13 @@ Visualization.list.set('pie', class Pie extends Visualization {
 
 		for(const row of this.source.originalResponse.data) {
 
-			const value = parseFloat(row.value);
+			const value = parseFloat(row[this.options.valueColumn]);
 
 			if(!value) {
 				continue;
 			}
 
-			newResponse[row.name] = value;
+			newResponse[row[this.options.nameColumn]] = value;
 		}
 
 		this.source.originalResponse.data = [newResponse];
@@ -10209,6 +10211,11 @@ Visualization.list.set('pie', class Pie extends Visualization {
 	}
 
 	async render(options = {}) {
+
+		if(!this.options.valueColumn || !this.options.nameColumn) {
+
+			return this.source.error('Name or value column cannot be empty.');
+		}
 
 		this.rows = await this.source.response();
 

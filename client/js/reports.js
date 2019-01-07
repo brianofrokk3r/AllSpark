@@ -10143,6 +10143,14 @@ Visualization.list.set('funnel', class Funnel extends Visualization {
 
 Visualization.list.set('pie', class Pie extends Visualization {
 
+	constructor(visualization, source) {
+
+		super(visualization, source);
+
+		this.options.nameColumn = this.options.nameColumn || 'name';
+		this.options.valueColumn = this.options.valueColumn || 'value';
+	}
+
 	get container() {
 
 		if(this.containerElement) {
@@ -10186,7 +10194,12 @@ Visualization.list.set('pie', class Pie extends Visualization {
 			return;
 		}
 
-		for(const row of this.source.originalResponse.data) {
+		if(!(this.options.valueColumn in response.data[0]) || !(this.options.nameColumn in response.data[0])) {
+
+			return;
+		}
+
+		for(const row of response.data) {
 
 			const value = parseFloat(row[this.options.valueColumn]);
 

@@ -10149,6 +10149,15 @@ Visualization.list.set('pie', class Pie extends Visualization {
 
 		this.options.nameColumn = this.options.nameColumn || 'name';
 		this.options.valueColumn = this.options.valueColumn || 'value';
+
+		this.options.transformations = this.options.transformations || [];
+		this.options.transformations.push({
+			type: 'pivot', options:{
+				rows: [],
+				values: [{column: this.options.valueColumn, function: "sum"}],
+				columns: [{column: this.options.nameColumn}]
+			}
+		});
 	}
 
 	get container() {
@@ -10179,58 +10188,31 @@ Visualization.list.set('pie', class Pie extends Visualization {
 
 		this.source.originalColumns = new Map(this.source.columns);
 
-		this.process();
-
 		await this.render(options);
-	}
-
-	process() {
-
-		const
-			response = this.source.originalResponse,
-			newResponse = {};
-
-		if(!response || !response.data || !response.data.length) {
-			return;
-		}
-
-		if(!(this.options.valueColumn in response.data[0]) || !(this.options.nameColumn in response.data[0])) {
-
-			return;
-		}
-
-		for(const row of response.data) {
-
-			const value = parseFloat(row[this.options.valueColumn]);
-
-			if(!value) {
-				continue;
-			}
-
-			newResponse[row[this.options.nameColumn]] = value;
-		}
-
-		this.source.originalResponse.data = [newResponse];
-
-		this.source.columns.clear();
-		this.source.columns.update();
-		this.source.columns.render();
-
-		const visualizationToggle = this.source.container.querySelector('header .change-visualization');
-
-		if(visualizationToggle) {
-			visualizationToggle.value = this.source.visualizations.indexOf(this);
-		}
 	}
 
 	async render(options = {}) {
 
-		if(!this.options.valueColumn || !this.options.nameColumn) {
+		const dataRow = this.source.originalResponse.data[0];
 
-			return this.source.error('Name or value column cannot be empty.');
+		if(!(this.options.nameColumn in dataRow)) {
+
+			return this.source.error('Invalid name column.');
+		}
+
+		if(!(this.options.valueColumn in dataRow)) {
+
+			return this.source.error('Invalid value column.');
 		}
 
 		this.rows = await this.source.response();
+
+		if(!this.rows|| !this.rows.length || !this.rows[0].size) {
+
+			return this.source.error();
+		}
+
+		this.rows = this.rows[0];
 
 		this.height = this.container.clientHeight - 20;
 		this.width = this.container.clientWidth - 20;
@@ -10253,16 +10235,12 @@ Visualization.list.set('pie', class Pie extends Visualization {
 
 		container.selectAll('*').remove();
 
-		if(!this.rows || !this.rows.length || !this.rows[0].size) {
-			return this.source.error();
-		}
-
 		const
-			[row] = this.rows,
 			data = [],
-			sum = Array.from(row.values()).reduce((sum, value) => sum + value, 0);
+			sum = Array.from(this.rows.values()).reduce((sum, value) => sum + value, 0);
 
-		for(const [name, value] of this.rows[0]) {
+		for(const [name, value] of this.rows) {
+
 			data.push({name, value, percentage: Math.floor((value / sum) * 10000) / 100});
 		}
 

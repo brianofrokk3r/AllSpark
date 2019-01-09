@@ -10151,13 +10151,6 @@ Visualization.list.set('pie', class Pie extends Visualization {
 		this.options.valueColumn = this.options.valueColumn || 'value';
 
 		this.options.transformations = this.options.transformations || [];
-		this.options.transformations.push({
-			type: 'pivot', options:{
-				rows: [],
-				values: [{column: this.options.valueColumn, function: "sum"}],
-				columns: [{column: this.options.nameColumn}]
-			}
-		});
 	}
 
 	get container() {
@@ -10188,19 +10181,32 @@ Visualization.list.set('pie', class Pie extends Visualization {
 
 		this.source.originalColumns = new Map(this.source.columns);
 
+		const dataRow = this.source.originalResponse.data[0];
+
+		if((this.options.nameColumn in dataRow) || (this.options.valueColumn in dataRow)) {
+
+			this.options.transformations.push({
+				type: 'pivot', options:{
+					rows: [],
+					values: [{column: this.options.valueColumn, function: "sum"}],
+					columns: [{column: this.options.nameColumn}]
+				}
+			});
+		}
+
 		await this.render(options);
 	}
 
 	async render(options = {}) {
 
-		const dataRow = this.source.originalResponse.data[0];
+		const originalResponse = this.source.originalResponse.data;
 
-		if(!(this.options.nameColumn in dataRow)) {
+		if(!(this.options.nameColumn in originalResponse[0]) && originalResponse.length > 1) {
 
 			return this.source.error('Invalid name column.');
 		}
 
-		if(!(this.options.valueColumn in dataRow)) {
+		if(!(this.options.valueColumn in originalResponse[0]) && originalResponse.length > 1) {
 
 			return this.source.error('Invalid value column.');
 		}

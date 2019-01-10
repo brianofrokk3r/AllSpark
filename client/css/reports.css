@@ -289,6 +289,16 @@ button[disabled] {
 		flex-wrap: wrap;
 		margin: 0;
 	}
+		.data-source .overlay .filters label.changed > input,
+		.data-source .overlay .filters label.changed > select,
+		.data-source .overlay .filters label.changed > .multi-select {
+			box-shadow: 0 0 2px 3px var(--color-red);
+		}
+		.data-source .overlay .filters label.changed.submitted > input,
+		.data-source .overlay .filters label.changed.submitted > select,
+		.data-source .overlay .filters label.changed.submitted > .multi-select {
+			box-shadow: 0 0 2px 3px var(--color-green);
+		}
 	.data-source > .description {
 		display: grid;
 	}

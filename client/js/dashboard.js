@@ -1846,6 +1846,8 @@ class DashboardGlobalFilters extends DataSourceFilters {
 				filter.value = matchingFilter.value;
 
 				found = true;
+
+				matchingFilter.changed({state: 'submitted'});
 			}
 
 			if (options.dontLoad) {

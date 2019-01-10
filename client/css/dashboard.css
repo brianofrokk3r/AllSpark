@@ -362,7 +362,7 @@ main #reports > .global-filters.top.scrolled {
 			main #reports > .global-filters form.filters > label.changed.submitted > input,
 			main #reports > .global-filters form.filters > label.changed.submitted > select,
 			main #reports > .global-filters form.filters > label.changed.submitted > .multi-select {
-				box-shadow: 0 0 2px 3px var(--color-red);
+				box-shadow: 0 0 2px 3px var(--color-green);
 			}
 			main #reports > .global-filters > .head.heading input[type=search] {
 				border: 0;

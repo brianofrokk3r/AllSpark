@@ -1869,7 +1869,6 @@ class DashboardGlobalFilters extends DataSourceFilters {
 				Dashboard.selectedValues.set(placeholder, filter.value);
 			}
 		}
-
 	}
 }
 

@@ -31,18 +31,18 @@ class UserOnboard {
 	async load() {
 
 		this.progress = 0;
-		this.stages = [];
+		this.stages = new Map();
 
-		for(const stage of UserOnboard.stages.values()) {
+		for(const [key, stage] of UserOnboard.stages) {
 
 			const stageObj = new stage(this);
 			await stageObj.load();
 
-			this.stages.push(stageObj);
+			this.stages.set(key, stageObj);
 			this.progress = stageObj.progress;
 		}
 
-		[this.nextStage] = this.stages.filter(x => !x.completed);
+		[this.nextStage] = [...this.stages.values()].filter(x => !x.completed);
 
 		if(document.querySelector('.setup-stages')) {
 
@@ -81,7 +81,7 @@ class UserOnboard {
 
 		const wrapper = container.querySelector('.wrapper');
 
-		for(const stage of this.stages) {
+		for(const stage of this.stages.values()) {
 
 			if(stage.completed) {
 
@@ -96,7 +96,8 @@ class UserOnboard {
 
 	async loadWelcomeDialogBox() {
 
-		if(this.stages.some(stage => stage.completed)) {
+		if([...this.stages.values()].some(stage => stage.completed)) {
+
 			return;
 		}
 
@@ -152,7 +153,7 @@ class UserOnboard {
 
 }
 
-UserOnboard.stages = new Set();
+UserOnboard.stages = new Map();
 
 class UserOnboardStage {
 
@@ -222,7 +223,7 @@ class UserOnboardStage {
 	}
 }
 
-UserOnboard.stages.add(class AddConnection extends UserOnboardStage {
+UserOnboard.stages.set('add-connection', class AddConnection extends UserOnboardStage {
 
 	constructor(stagesObj) {
 
@@ -248,13 +249,13 @@ UserOnboard.stages.add(class AddConnection extends UserOnboardStage {
 
 	async load() {
 
-		const [response] = await API.call('credentials/list');
+		const response = await API.call('credentials/list');
 
-		if(!response) {
+		if(!response || response.length <= 2) {
 			return;
 		}
 
-		this.connection = response;
+		this.connection = response[2];
 
 		this.completed = true;
 		this.progress = this.progress + 10;
@@ -303,7 +304,7 @@ UserOnboard.stages.add(class AddConnection extends UserOnboardStage {
 
 });
 
-UserOnboard.stages.add(class AddReport extends UserOnboardStage {
+UserOnboard.stages.set('add-report', class AddReport extends UserOnboardStage {
 
 	constructor(stagesObj) {
 
@@ -400,6 +401,8 @@ UserOnboard.stages.add(class AddReport extends UserOnboardStage {
 			}
 		}
 
+		configureForm.elements['connection_name'].value = this.stagesObj.stages.get('add-connection').connection.id;
+
 		submitButton.on('click', () => this.hidePopUp())
 
 		new SnackBar({
@@ -451,7 +454,7 @@ UserOnboard.stages.add(class AddReport extends UserOnboardStage {
 
 });
 
-UserOnboard.stages.add(class AddDashboard extends UserOnboardStage {
+UserOnboard.stages.set('add-dashboard', class AddDashboard extends UserOnboardStage {
 
 	constructor(stagesObj) {
 
@@ -537,7 +540,7 @@ UserOnboard.stages.add(class AddDashboard extends UserOnboardStage {
 
 });
 
-UserOnboard.stages.add(class AddVisualization extends UserOnboardStage {
+UserOnboard.stages.set('add-visualization', class AddVisualization extends UserOnboardStage {
 
 	constructor(stagesObj) {
 
@@ -627,7 +630,7 @@ UserOnboard.stages.add(class AddVisualization extends UserOnboardStage {
 
 	setPickVisualizationStage() {
 
-		if(this.stagesObj.stages[3].completed) {
+		if(this.stagesObj.stages.get('add-visualization').completed) {
 
 			return;
 		}
@@ -715,7 +718,7 @@ UserOnboard.stages.add(class AddVisualization extends UserOnboardStage {
 	}
 });
 
-UserOnboard.stages.add(class AddVisualizationDashboard extends UserOnboardStage {
+UserOnboard.stages.set('add-visualization-dashboard', class AddVisualizationDashboard extends UserOnboardStage {
 
 	constructor(stagesObj) {
 

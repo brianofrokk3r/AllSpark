@@ -46,7 +46,7 @@ exports.insert = class extends API {
 			'write'
 		);
 
-		if (bigquery) {
+		if (bigquery && type == "bigquery") {
 
 			await bigquery.setup();
 		}

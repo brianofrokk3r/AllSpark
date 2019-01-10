@@ -1381,23 +1381,26 @@ ReportsManger.stages.set('define-report', class DefineReport extends ReportsMang
 
 	setDirtyForm() {
 
-		if(!this.report.connection.editor)
+		if(!this.report.connection.editor) {
 			return;
+		}
 
 		const query = this.report.connection.json.query;
 
-		this.container.querySelector('#stage-define-report button[type=submit]').classList.toggle('not-saved', this.report.query != query);
+		this.container.querySelector('#stage-define-report button[type=submit]').classList.toggle('not-saved', this.report.definition.query != query);
 	}
 
 	saveReportConfirm() {
 
 		const defineReportSaveButton = this.container.querySelector('#stage-define-report > .toolbar button[type=submit].not-saved');
 
-		if(!defineReportSaveButton)
+		if(!defineReportSaveButton) {
 			return true;
+		}
 
-		if(!confirm('Are you sure you want to change the state? All the unsaved data will be lost.'))
+		if(!confirm('Are you sure you want to change the state? All the unsaved data will be lost.')) {
 			return false;
+		}
 
 		defineReportSaveButton.classList.remove('not-saved');
 
